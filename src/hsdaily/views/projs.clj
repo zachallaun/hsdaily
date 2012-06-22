@@ -1,6 +1,6 @@
 (ns hsdaily.views.projs
-  (:require [hsdaily.views.common :as com])
-  (:use [noir.core :only [defpage defpartial]]))
+  (:use [noir.core :only [defpage defpartial]])
+  (:require [hsdaily.views.common :as com]))
 
 (defpage "/" []
   (com/layout
