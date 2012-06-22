@@ -21,13 +21,13 @@
   (testing "project document insertion"
     (mc/remove projs/proj-collection)
 
-    (testing "single insertion"
+    (testing "single insert"
       (with-noir (projs/add! {:name "test proj 1"}))
 
       (is (= (mc/count projs/proj-collection)
              1)))
 
-    (testing "batch insertion"
+    (testing "batch insert"
       (with-noir (projs/add! [{:name "test proj 2"}
                               {:name "test proj 3"}]))
 
@@ -61,7 +61,7 @@
     (is (not= "password123"
               (:password (users/prep-new {:password "password123"})))))
 
-  (testing "user document insertion"
+  (testing "user document insert"
     (with-noir (users/add! {:username "testusername"
                             :password "password123"}))
     (is (= (mc/count users/user-collection)
