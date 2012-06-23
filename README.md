@@ -4,15 +4,11 @@ A website written in noir.
 
 ## Usage
 
-```bash
-mongod
+Install Datomic into a local repo, then:
+
 ```
-
-and in a new terminal:
-
-```bash
-lein deps
-lein run
+lein2 deps
+lein2 test
 ```
 
 ## License
