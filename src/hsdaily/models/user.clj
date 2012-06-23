@@ -1,12 +1,15 @@
 (ns hsdaily.models.user
-  (:require [monger.collection :as mc]
-            [noir.validation :as v]
+  (:use [hsdaily.db :only [conn]]
+        [datomic.api :only [q db] :as d])
+  (:require [noir.validation :as v]
             [noir.util.crypt :as crypt]))
 
-(def user-collection "users")
-
 (defn valid-username? [username]
-  (v/rule (not (mc/find-one user-collection {:username username}))
+  (v/rule (not (first (q '[:find ?e
+                           :in $ ?un
+                           :where [?e :user/username ?un]]
+                         (db @conn)
+                         username)))
           [:username "That username already exists"])
   (v/rule (v/min-length? username 2)
           [:username "Usernames must be 2 characters"])
@@ -24,9 +27,12 @@
        (valid-password? password)))
 
 (defn prep-new [{:keys [password] :as user}]
-  (-> user
-      (assoc :password (crypt/encrypt password))))
+  (let [{:keys [username password]} (-> user
+                                        (assoc :password (crypt/encrypt password)))]
+    {:db/id (d/tempid :db.part/user)
+     :user/username username
+     :user/password password}))
 
 (defn add! [user]
   (when (valid? user)
-    (mc/insert user-collection (prep-new user))))
+    (d/transact @conn [(prep-new user)])))

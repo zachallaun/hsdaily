@@ -2,16 +2,12 @@
   (:use [clojure.test]
         [noir.util.test :only [with-noir]]
         [datomic.api :only [q db] :as d]
-        [monger.core :only [set-db! get-db connect!]]
         [hsdaily.db :only [conn] :as hsdb])
   (:require [hsdaily.models.proj :as projs]
             [hsdaily.models.user :as users]
-            [monger.collection :as mc]))
+            [hsdaily.query :as hsq]))
 
 (deftest project-model
-
-  ;; Connect to clean memory db
-  (hsdb/retract-all conn hsdb/mem-uri)
 
   (testing "project model validations"
     (is (true? (with-noir (projs/valid? {:name "Test Project"}))))
@@ -28,19 +24,17 @@
     (testing "single insert"
       (with-noir (projs/add! {:name "test proj 1"}))
 
-      (is (= (count (q '[:find ?e :where [?e :project/name]] (db @conn)))
+      (is (= (count (q hsq/all-with-attr (db @conn) :project/name))
              1)))
 
     (testing "batch insert"
       (with-noir (projs/add! [{:name "test proj 2"}
                               {:name "test proj 3"}]))
 
-      (is (= (count (q '[:find ?e :where [?e :project/name]] (db @conn)))
+      (is (= (count (q hsq/all-with-attr (db @conn) :project/name))
              3)))))
 
 (deftest user-model
-
-  (mc/remove users/user-collection)
 
   (testing "user model validations"
 
@@ -68,17 +62,17 @@
   (testing "user document insert"
     (with-noir (users/add! {:username "testusername"
                             :password "password123"}))
-    (is (= (mc/count users/user-collection)
+    (is (= (count (q hsq/all-with-attr (db @conn) :user/username))
            1))
 
     (testing "no duplicate usernames"
       (with-noir (users/add! {:username "testusername"
                               :password "anotherpassword"}))
-      (is (= (mc/count users/user-collection)
+      (is (= (count (q hsq/all-with-attr (db @conn) :user/username))
              1)))))
 
 (defn test-ns-hook []
-  (connect!)
-  (set-db! (get-db "hsdaily-testing"))
+  ;; Connect to clean memory db
+  (hsdb/retract-all conn hsdb/mem-uri)
   (project-model)
   (user-model))

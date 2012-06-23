@@ -3,7 +3,6 @@
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [noir "1.2.1"
                   :exclusions [org.clojure/clojure]]
-                 [com.novemberain/monger "1.0.0-rc2"]
                  [com.datomic/datomic "0.1.3164"]]
   :main hsdaily.server
   :description "FIXME: write this!")
