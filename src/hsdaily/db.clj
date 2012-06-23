@@ -1,12 +1,19 @@
 (ns hsdaily.db
   (:require [datomic.api :as d]))
 
-;; Development database
-(def uri "datomic:dev://localhost:4334/hsdaily")
-(d/create-database uri)
-
-(def conn (d/connect uri))
+(def dev-uri "datomic:dev://localhost:4334/hsdaily")
+(def mem-uri "datomic:mem://hsdaily")
 
 (def schema-tx (read-string (slurp "./hsdaily-schema.dtm")))
 
-(d/transact conn schema-tx)
+(defn make-db-and-conn [uri]
+  (d/create-database uri)
+  (let [c (d/connect uri)]
+    @(d/transact c schema-tx)
+    c))
+
+(defn retract-all [conn uri]
+  (d/delete-database uri)
+  (reset! conn (make-db-and-conn uri)))
+
+(def conn (atom (make-db-and-conn dev-uri)))

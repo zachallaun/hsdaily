@@ -1,8 +1,7 @@
 (ns hsdaily.models.proj
-  (:require [monger.collection :as mc]
-            [noir.validation :as v]))
-
-(def proj-collection "projects")
+  (:use [hsdaily.db :only [conn]]
+        [datomic.api :only [q db] :as d])
+  (:require [noir.validation :as v]))
 
 (defn valid? [{:keys [name]}]
   (v/rule (v/has-value? name)
@@ -10,16 +9,19 @@
   (not (v/errors?)))
 
 (defn prep-new [{:keys [desc] :as proj}]
-  (-> proj
-      (assoc :desc (or desc "A new project."))))
+  (let [{:keys [name desc]} (-> proj
+                                (assoc :desc (or desc "A new project.")))]
+    {:db/id (d/tempid :db.part/user)
+     :project/name name
+     :project/desc desc}))
 
 (defmulti add!
   "Allow single or batch insert."
   vector?)
 
 (defmethod add! true [projs]
-  (mc/insert-batch proj-collection (map prep-new (filter valid? projs))))
+  (d/transact @conn (map prep-new (filter valid? projs))))
 
 (defmethod add! false [proj]
   (when (valid? proj)
-    (mc/insert proj-collection (prep-new proj))))
+    (d/transact @conn [(prep-new proj)])))

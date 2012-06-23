@@ -1,12 +1,17 @@
 (ns hsdaily.test.models
   (:use [clojure.test]
         [noir.util.test :only [with-noir]]
-        [monger.core :only [set-db! get-db connect!]])
+        [datomic.api :only [q db] :as d]
+        [monger.core :only [set-db! get-db connect!]]
+        [hsdaily.db :only [conn] :as hsdb])
   (:require [hsdaily.models.proj :as projs]
             [hsdaily.models.user :as users]
             [monger.collection :as mc]))
 
 (deftest project-model
+
+  ;; Connect to clean memory db
+  (hsdb/retract-all conn hsdb/mem-uri)
 
   (testing "project model validations"
     (is (true? (with-noir (projs/valid? {:name "Test Project"}))))
@@ -14,24 +19,23 @@
 
   (testing "project document preparation"
     (is (contains? (projs/prep-new {})
-                   :desc))
-    (is (= (:desc (projs/prep-new {:desc "test description"}))
+                   :project/desc))
+    (is (= (:project/desc (projs/prep-new {:desc "test description"}))
            "test description")))
 
   (testing "project document insertion"
-    (mc/remove projs/proj-collection)
 
     (testing "single insert"
       (with-noir (projs/add! {:name "test proj 1"}))
 
-      (is (= (mc/count projs/proj-collection)
+      (is (= (count (q '[:find ?e :where [?e :project/name]] (db @conn)))
              1)))
 
     (testing "batch insert"
       (with-noir (projs/add! [{:name "test proj 2"}
                               {:name "test proj 3"}]))
 
-      (is (= (mc/count projs/proj-collection)
+      (is (= (count (q '[:find ?e :where [?e :project/name]] (db @conn)))
              3)))))
 
 (deftest user-model
