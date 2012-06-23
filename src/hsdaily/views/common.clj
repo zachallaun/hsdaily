@@ -1,6 +1,6 @@
 (ns hsdaily.views.common
   (:use [noir.core :only [defpartial defpage pre-route]]
-        [hiccup.page-helpers :only [include-css html5]])
+        [hiccup.page :only [include-css html5]])
   (:require [hsdaily.models.proj :as projs]
             [hsdaily.models.user :as users]
             [noir.session :as session]
@@ -20,10 +20,10 @@
 ;;              (resp/redirect "/login")))
 
 (defpartial layout [& content]
-            (html5
-              [:head
-               [:title "hsdaily"]
-               (include-css "/css/reset.css")]
-              [:body
-               [:div#wrapper
-                content]]))
+  (html5
+   [:head
+    [:title "hsdaily"]
+    (include-css "/css/reset.css")]
+   [:body
+    [:div#wrapper
+     content]]))
