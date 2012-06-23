@@ -1,9 +1,5 @@
 (ns hsdaily.server
-  (:require [noir.server :as server]
-            [monger.core :as mg]))
-
-(mg/connect!)
-(mg/set-db! (mg/get-db "hsdaily-mongo"))
+  (:require [noir.server :as server]))
 
 (server/load-views "src/hsdaily/views/")
 
