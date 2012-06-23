@@ -36,3 +36,13 @@
 (defn add! [user]
   (when (valid? user)
     (d/transact @conn [(prep-new user)])))
+
+(def username->pass '[:find ?pass
+                      :in $ ?un
+                      :where
+                      [?e :user/username ?un]
+                      [?e :user/password ?pass]])
+
+(defn valid-login? [{:keys [username password]}]
+  (crypt/compare password
+                 (ffirst (q username->pass (db @conn) username))))
