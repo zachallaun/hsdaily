@@ -6,6 +6,7 @@
         [hiccup.element :only [link-to]])
   (:require [hsdaily.models.user :as users]
             [hsdaily.views.common :as com]
+            [hsdaily.github :as gh]
             [noir.session :as session]
             [noir.response :as resp]
             [noir.validation :as v]))
@@ -25,9 +26,20 @@
 
 (defpage "/login" []
   (com/layout
-   (make-form-to "login" login-fields)
-   [:div [:p "or " (link-to "/register" "Register")]]))
+   [:div.hero-unit
+    [:h1 "Stay in the loop."]
+    [:p "Publish projects, discuss ideas, and follow fellow hacker schoolers with a 4-times weekly digest."]
+    [:a.btn-auth.btn-github.large {:href gh/oauth-access-url}
+     "Sign in with " [:strong "Github"]]]))
 
 (defpage "/register" []
   (com/layout
    (make-form-to "register" registration-fields)))
+
+(defpage "/oauth" {:keys [code]}
+  (session/flash-put! :username (gh/get-username (gh/get-token code)))
+  (resp/redirect "/test"))
+
+(defpage "/test" []
+  (com/layout
+   [:hi "Hello, " (session/flash-get :username)]))

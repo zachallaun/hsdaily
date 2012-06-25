@@ -23,7 +23,10 @@
   (html5
    [:head
     [:title "hsdaily"]
-    (include-css "/css/reset.css")]
+    (include-css "/css/bootstrap.css")
+    (include-css "/css/auth-buttons.css")]
    [:body
-    [:div#wrapper
+    [:div.container
+     [:div.row
+      [:div.span4 [:h1 "Hacker School Daily"] [:h6 "digests for hacker schoolers"]]]
      content]]))
