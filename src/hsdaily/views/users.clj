@@ -26,11 +26,13 @@
 
 (defpage "/login" []
   (com/layout
-   [:div.hero-unit
-    [:h1 "Stay in the loop."]
-    [:p "Publish projects, discuss ideas, and follow fellow hacker schoolers with a 4-times weekly digest."]
-    [:a.btn-auth.btn-github.large {:href gh/oauth-access-url}
-     "Sign in with " [:strong "Github"]]]))
+   (if (users/current-user)
+     (resp/redirect "/")
+     [:div.hero-unit
+      [:h1 "Stay in the loop."]
+      [:p "Publish projects, discuss ideas, and follow fellow hacker schoolers with a 4-times weekly digest."]
+      [:a.btn-auth.btn-github.large {:href gh/oauth-access-url}
+       "Sign in with " [:strong "Github"]]])))
 
 (defpage "/logout" []
   (session/remove! :auth-token)

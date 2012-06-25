@@ -1,6 +1,7 @@
 (ns hsdaily.views.common
   (:use [noir.core :only [defpartial defpage pre-route]]
-        [hiccup.page :only [include-css html5]])
+        [hiccup.page :only [include-css html5]]
+        [hiccup.element :only [link-to]])
   (:require [hsdaily.models.proj :as projs]
             [hsdaily.models.user :as users]
             [noir.session :as session]
@@ -28,5 +29,9 @@
    [:body
     [:div.container
      [:div.row
-      [:div.span4 [:h1 "Hacker School Daily"] [:h6 "digests for hacker schoolers"]]]
+      [:div.span4 [:h1 "Hacker School Daily"] [:h6 "digests for hacker schoolers"]]
+      [:div.span1.offset7
+       (if (users/current-user)
+         (link-to "/logout" "Logout")
+         (link-to "/login" "Login"))]]
      content]]))

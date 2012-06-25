@@ -6,4 +6,5 @@
 
 (defpage "/" []
   (com/layout
-   [:hi "Hello, " (or (:user/username (users/current-user)) "No-man")]))
+   [:h1 "Hello, " (or (:user/username (users/current-user))
+                      "No-man")]))
