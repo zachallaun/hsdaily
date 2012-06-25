@@ -5,6 +5,7 @@
 (def mem-uri "datomic:mem://hsdaily")
 
 (def schema-tx (read-string (slurp "./hsdaily-schema.dtm")))
+;; (def dev-data (read-string (slurp "./hsdaily-dev-data.dtm")))
 
 (defn make-db-and-conn [uri]
   (d/create-database uri)
