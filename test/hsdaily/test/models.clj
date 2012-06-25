@@ -38,38 +38,7 @@
 
   (testing "user model validations"
 
-    (testing "username validation"
-      (is (true? (with-noir (users/valid-username? "testusername"))))
-      (are [un] (false? (with-noir (users/valid-username? un)))
-           "z"
-           "reallylongusername"))
-
-    (testing "password validation"
-      (is (true? (with-noir (users/valid-password? "password123"))))
-      (is (false? (with-noir (users/valid-password? "weak")))))
-
-    (is (true? (with-noir (users/valid? {:username "testusername"
-                                         :password "password123"}))))
-    (is (false? (with-noir (users/valid? {:username "testusername"
-                                          :password "weak"}))))
-    (is (false? (with-noir (users/valid? {:username "z"
-                                          :password "password123"})))))
-
-  (testing "password encryption"
-    (is (not= "password123"
-              (:password (users/prep-new {:password "password123"})))))
-
-  (testing "user document insert"
-    (with-noir (users/add! {:username "testusername"
-                            :password "password123"}))
-    (is (= (count (q hsq/all-with-attr (db @conn) :user/username))
-           1))
-
-    (testing "no duplicate usernames"
-      (with-noir (users/add! {:username "testusername"
-                              :password "anotherpassword"}))
-      (is (= (count (q hsq/all-with-attr (db @conn) :user/username))
-             1)))))
+    (is (= true false) "Add user tests")))
 
 (defn test-ns-hook []
   ;; Connect to clean memory db
