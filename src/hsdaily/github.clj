@@ -29,9 +29,6 @@
   "Accepts a github access-token; returns an api url for that user."
   (partial str api-url "user?access_token=") )
 
-;; (defn get-username [token]
-;;   (-> (http/get (str "https://"))))
-
 (defn get-token [code]
   (->> (http/post token-url
                   {:form-params {:client_id (client-id @conn)
@@ -41,8 +38,7 @@
        (util/query-str->map)
        (:access_token)))
 
-(defn get-username [token]
+(defn get-user [token]
   (-> (http/get (gen-user-url token))
       (:body)
-      (json/decode true)
-      :login))
+      (json/decode true)))

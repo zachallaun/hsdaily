@@ -6,3 +6,4 @@ pom.xml
 .lein-failures
 *.#*
 /target/
+/src/hsdaily/gh-client-seed.clj

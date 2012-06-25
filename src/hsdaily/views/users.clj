@@ -32,14 +32,15 @@
     [:a.btn-auth.btn-github.large {:href gh/oauth-access-url}
      "Sign in with " [:strong "Github"]]]))
 
+(defpage "/logout" []
+  (session/remove! :auth-token)
+  (resp/redirect "/"))
+
 (defpage "/register" []
   (com/layout
    (make-form-to "register" registration-fields)))
 
 (defpage "/oauth" {:keys [code]}
-  (session/flash-put! :username (gh/get-username (gh/get-token code)))
-  (resp/redirect "/test"))
-
-(defpage "/test" []
-  (com/layout
-   [:hi "Hello, " (session/flash-get :username)]))
+  (let [user (users/make-or-update-user! code)]
+    (session/put! :auth-token (:user/auth-token user))
+    (resp/redirect "/")))

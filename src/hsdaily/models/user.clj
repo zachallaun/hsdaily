@@ -1,48 +1,34 @@
 (ns hsdaily.models.user
   (:use [hsdaily.db :only [conn]]
         [datomic.api :only [q db] :as d])
-  (:require [noir.validation :as v]
-            [noir.util.crypt :as crypt]))
+  (:require [hsdaily.github :as gh]
+            [hsdaily.query :as hsq]
+            [noir.session :as session]))
 
-(defn valid-username? [username]
-  (v/rule (not (first (q '[:find ?e
-                           :in $ ?un
-                           :where [?e :user/username ?un]]
-                         (db @conn)
-                         username)))
-          [:username "That username already exists"])
-  (v/rule (v/min-length? username 2)
-          [:username "Usernames must be 2 characters"])
-  (v/rule (v/max-length? username 15)
-          [:username "Usernames must be less than 15 characters"])
-  (not (v/errors? :username)))
-
-(defn valid-password? [password]
-  (v/rule (v/min-length? password 6)
-          [:password "Passwords must be at least 6 characters"])
-  (not (v/errors? :password)))
-
-(defn valid? [{:keys [username password]}]
-  (and (valid-username? username)
-       (valid-password? password)))
-
-(defn prep-new [{:keys [password] :as user}]
-  (let [{:keys [username password]} (-> user
-                                        (assoc :password (crypt/encrypt password)))]
-    {:db/id (d/tempid :db.part/user)
-     :user/username username
-     :user/password password}))
+(defn prep-new [{:keys [login email auth-token] :as user}]
+  (let [user {:db/id (d/tempid :db.part/user)
+              :user/username login
+              :user/email email
+              :user/auth-token auth-token}]
+    user))
 
 (defn add! [user]
-  (when (valid? user)
-    (d/transact @conn [(prep-new user)])))
+  (d/transact @conn [(prep-new user)]))
 
-(def username->pass '[:find ?pass
-                      :in $ ?un
-                      :where
-                      [?e :user/username ?un]
-                      [?e :user/password ?pass]])
+(defn update! [user])
 
-(defn valid-login? [{:keys [username password]}]
-  (crypt/compare password
-                 (ffirst (q username->pass (db @conn) username))))
+(def token->id (partial hsq/q-first-id-with-key @conn :user/auth-token))
+(def username->id (partial hsq/q-first-id-with-key @conn :user/username))
+
+(defn current-user []
+  (when-let [token (session/get :auth-token)]
+    (d/entity (db @conn) (token->id token))))
+
+(defn make-or-update-user!
+  "Accepts a temporary github oauth code, creates a user, and returns a datomic entity."
+  [temp-code]
+  (let [token (gh/get-token temp-code)
+        user (gh/get-user token)]
+    (when (nil? (username->id (:login user)))
+      (add! (assoc user :auth-token token)))
+    (d/entity (db @conn) (username->id (:login user)))))
