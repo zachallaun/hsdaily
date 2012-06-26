@@ -2,20 +2,12 @@
   (:use [datomic.api :only [q db] :as d]
         [hsdaily.db :only [conn]]
         [hsdaily.query :only [val-at-key]]
-        [clj-http.client :only [generate-query-string] :as http])
+        [clj-http.client :only [generate-query-string] :as http]
+        [clj-yaml.core :as yaml])
   (:require [cheshire.core :as json]
             [hsdaily.util :as util]))
 
-;; Datomic access funcs
-(defn client-id
-  "Accepts a datomic connection; returns the value at :github/client-id."
-  [conn]
-  (ffirst (q val-at-key (db conn) :github/client-id)))
-
-(defn client-secret
-  "Accepts a datomic connection; returns the value at :github/client-secret"
-  [conn]
-  (ffirst (q val-at-key (db conn) :github/client-secret)))
+(def gh-keys (yaml/parse-string (slurp "./ghclient.yaml")))
 
 ;; Github oauth/api urls
 (def auth-url "https://github.com/login/oauth/authorize")
@@ -23,12 +15,9 @@
 (def api-url "https://api.github.com/")
 
 (def oauth-access-url (str auth-url "?" (generate-query-string
-                                         {:client_id (client-id @conn)})))
+                                         {:client_id (:client-id gh-keys)})))
 
-(def gen-user-url
-  "Accepts a github access-token; returns an api url for that user."
-  (partial str api-url "user?access_token=") )
-
+(def auth-user-api (partial str api-url "user?access_token="))
 (def users-api (partial str api-url "users/"))
 (def repos-api (partial str api-url "repos/"))
 
@@ -47,8 +36,8 @@
 
 (defn get-token [code]
   (->> (http/post token-url
-                  {:form-params {:client_id (client-id @conn)
-                                 :client_secret (client-secret @conn)
+                  {:form-params {:client_id (:client-id gh-keys)
+                                 :client_secret (:client-secret gh-keys)
                                  :code code}})
        (:body)
        (util/query-str->map)
@@ -61,7 +50,7 @@
       (json/decode true)))
 
 ;; Functions accept arguments of api-url generator
-(def get-user (comp fetch-and-decode-body gen-user-url))
+(def get-user (comp fetch-and-decode-body auth-user-api))
 (def get-repos-of-user (comp fetch-and-decode-body repos-of-user))
 (def get-branches-of-repo (comp fetch-and-decode-body branches-of-repo))
 

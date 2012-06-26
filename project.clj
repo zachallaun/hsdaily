@@ -4,6 +4,7 @@
                  [noir "1.3.0-beta8"]
                  [com.datomic/datomic "0.1.3164"]
                  [clj-http "0.4.3"]
-                 [cheshire "4.0.0"]]
+                 [cheshire "4.0.0"]
+                 [clj-yaml "0.3.0-SNAPSHOT"]]
   :main hsdaily.server
   :description "Daily digest of hackerschooler project progress.")
