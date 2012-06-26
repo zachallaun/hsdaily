@@ -37,15 +37,13 @@
   [user]
   (users-api user "/repos"))
 
-(defn branches-of-repo
-  "/repos/:user/:repo/branches"
-  [user repo]
-  (repos-api user "/" repo "/branches"))
+(defn item-at-repo
+  [item]
+  (fn [u r]
+    (repos-api u "/" r item)))
 
-(defn commits-on-repo
-  "/repos/:user/:repo/commits"
-  [user repo]
-  (repos-api user "/" repo "/commits"))
+(def branches-of-repo (item-at-repo "/branches"))
+(def commits-on-repo (item-at-repo "/commits"))
 
 (defn get-token [code]
   (->> (http/post token-url
