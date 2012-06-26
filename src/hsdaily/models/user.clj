@@ -8,12 +8,14 @@
 (def token->id (partial hsq/q-first-id-with-key @conn :user/auth-token))
 (def username->id (partial hsq/q-first-id-with-key @conn :user/username))
 
-(defn prep-new [{:keys [login email auth-token] :as user}]
-  (let [user {:db/id (d/tempid :db.part/user)
-              :user/username login
-              :user/email email
-              :user/auth-token auth-token}]
-    user))
+(defn prep-user [{:keys [login email auth-token avatar_url] :as user}]
+  {:user/username login
+   :user/email email
+   :user/auth-token auth-token
+   :user/avatar-url (java.net.URI. avatar_url)})
+
+(defn prep-new [user]
+  (assoc (prep-new user) :db/id (d/tempid :db.part/user)))
 
 (defn add! [user]
   @(d/transact @conn [(prep-new user)]))
@@ -21,8 +23,7 @@
 (defn update! [user]
   (let [entity (d/entity (db @conn) (username->id (:login user)))
         entity (into {:db/id (:db/id entity)} entity)
-        updates {:user/auth-token (:auth-token user)
-                 :user/email (:email user)}]
+        updates (prep-user user)]
     @(d/transact @conn [(merge entity updates)])))
 
 (defn current-user []

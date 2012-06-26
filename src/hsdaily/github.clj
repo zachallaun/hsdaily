@@ -51,10 +51,10 @@
 
 ;; Functions accept arguments of api-url generator
 (def get-user (comp fetch-and-decode-body auth-user-api))
-(def get-repos-of-user (comp fetch-and-decode-body repos-of-user))
-(def get-branches-of-repo (comp fetch-and-decode-body branches-of-repo))
+(def get-user-repos (comp fetch-and-decode-body repos-of-user))
+(def get-repo-branches (comp fetch-and-decode-body branches-of-repo))
 
-(defn get-commits-of-branch
+(defn get-branch-commits
   [user repo branch-sha]
   (let [commits (-> (http/get (commits-on-repo user repo)
                               {:query-params {:sha branch-sha}})
@@ -62,12 +62,12 @@
                     (json/decode true))]
     (map :commit commits)))
 
-(defn get-commits-of-repo
+(defn get-repo-commits
   "Returns a seq of maps of the form {:branch \"branch-name\" :commits [...]}"
   [user repo]
-  (let [branches (get-branches-of-repo user repo)]
+  (let [branches (get-repo-branches user repo)]
     (map (fn [branch]
            {:branch (:name branch)
-            :commits (get-commits-of-branch user repo
+            :commits (get-branch-commits user repo
                                             (get-in branch [:commit :sha]))})
          branches)))
