@@ -30,8 +30,8 @@
   (when-let [token (session/get :auth-token)]
     (d/entity (db @conn) (token->id token))))
 
-(defn avatar-url [user]
-  (.toString (:user/avatar-url user)))
+(defn small-avatar-url [user]
+  (str (.toString (:user/avatar-url user)) "&s=50"))
 
 (defn make-or-update-user!
   "Accepts a temporary github oauth code, creates a user, and returns a datomic entity."

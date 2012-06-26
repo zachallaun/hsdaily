@@ -13,7 +13,7 @@
        [:div
         [:div.row
          [:div.span6
-          (image (users/avatar-url user))
+          (image (users/small-avatar-url user))
           [:div.row
            [:div.span4
             [:h4 (:user/username user)]]]]]
