@@ -1,8 +1,5 @@
 (ns hsdaily.github
-  (:use [datomic.api :only [q db] :as d]
-        [hsdaily.db :only [conn]]
-        [hsdaily.query :only [val-at-key]]
-        [clj-http.client :only [generate-query-string] :as http]
+  (:use [clj-http.client :only [generate-query-string] :as http]
         [clj-yaml.core :as yaml])
   (:require [cheshire.core :as json]
             [hsdaily.util :as util]))

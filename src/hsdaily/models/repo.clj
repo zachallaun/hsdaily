@@ -2,8 +2,8 @@
   (:use [hsdaily.db :only [conn]]
         [hsdaily.util :only [seq-if-not]]
         [datomic.api :only [q db] :as d])
-  (:require [noir.validation :as v]
-            [hsdaily.models.user :as users]))
+  (:require [hsdaily.models.user :as users]
+            [hsdaily.github :as gh]))
 
 (defn prep-repo [{:keys [full_name html_url name owner description]}]
   {:db/id (d/tempid :db.part/user)
@@ -16,3 +16,6 @@
 (defn insert! [repos]
   (let [repos (seq-if-not repos)]
     @(d/transact @conn (map prep-repo repos))))
+
+(defn insert-user-repos! [user]
+  (insert! (gh/get-user-repos (:user/username user))))

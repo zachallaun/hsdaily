@@ -5,11 +5,11 @@
         hiccup.form
         [hiccup.element :only [link-to]])
   (:require [hsdaily.models.user :as users]
+            [hsdaily.models.repo :as repos]
             [hsdaily.views.common :as com]
             [hsdaily.github :as gh]
             [noir.session :as session]
-            [noir.response :as resp]
-            [noir.validation :as v]))
+            [noir.response :as resp]))
 
 (defpartial login-fields []
   (text-field {:placeholder "username"} :username)
@@ -45,4 +45,5 @@
 (defpage "/oauth" {:keys [code]}
   (let [user (users/make-or-update-user! code)]
     (session/put! :auth-token (:user/auth-token user))
+    (repos/insert-user-repos! user)
     (resp/redirect "/")))
