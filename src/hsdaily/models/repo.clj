@@ -1,27 +1,18 @@
 (ns hsdaily.models.repo
   (:use [hsdaily.db :only [conn]]
+        [hsdaily.util :only [seq-if-not]]
         [datomic.api :only [q db] :as d])
-  (:require [noir.validation :as v]))
+  (:require [noir.validation :as v]
+            [hsdaily.models.user :as users]))
 
-;; (defn valid? [{:keys [name]}]
-;;   (v/rule (v/has-value? name)
-;;           [:title "Please enter a name for this project"])
-;;   (not (v/errors?)))
+(defn prep-repo [{:keys [full_name html_url name owner description]}]
+  {:db/id (d/tempid :db.part/user)
+   :repo/name name
+   :repo/full-name full_name
+   :repo/url (java.net.URI. html_url)
+   :repo/owner (users/username->id (:login owner))
+   :repo/desc description})
 
-;; (defn prep-new [{:keys [desc] :as proj}]
-;;   (let [{:keys [name desc]} (-> proj
-;;                                 (assoc :desc (or desc "A new project.")))]
-;;     {:db/id (d/tempid :db.part/user)
-;;      :project/name name
-;;      :project/desc desc}))
-
-;; (defmulti add!
-;;   "Allow single or batch insert."
-;;   vector?)
-
-;; (defmethod add! true [projs]
-;;   (d/transact @conn (map prep-new (filter valid? projs))))
-
-;; (defmethod add! false [proj]
-;;   (when (valid? proj)
-;;     (d/transact @conn [(prep-new proj)])))
+(defn insert! [repos]
+  (let [repos (seq-if-not repos)]
+    @(d/transact @conn (map prep-repo repos))))

@@ -15,15 +15,15 @@
    :user/auth-token auth-token
    :user/avatar-url (java.net.URI. avatar_url)})
 
-(defn insert! [user]
-  @(d/transact @conn [(prep-user user)]))
-
 (defn current-user []
   (when-let [token (session/get :auth-token)]
     (d/entity (db @conn) (token->id token))))
 
 (defn small-avatar-url [user]
   (str (.toString (:user/avatar-url user)) "&s=50"))
+
+(defn insert! [user]
+  @(d/transact @conn [(prep-user user)]))
 
 (defn make-or-update-user!
   "Accepts a temporary github oauth code, creates a user, and returns a datomic entity."
