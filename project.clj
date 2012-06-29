@@ -5,6 +5,7 @@
                  [com.datomic/datomic "0.1.3164"]
                  [clj-http "0.4.3"]
                  [cheshire "4.0.0"]
-                 [clj-yaml "0.3.0-SNAPSHOT"]]
+                 [clj-yaml "0.3.0-SNAPSHOT"]
+                 [overtone/at-at "1.0.0"]]
   :main hsdaily.server
   :description "Daily digest of hackerschooler project progress.")
