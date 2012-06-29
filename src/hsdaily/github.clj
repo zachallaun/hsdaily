@@ -71,3 +71,22 @@
             :commits (get-branch-commits user repo
                                             (get-in branch [:commit :sha]))})
          branches)))
+
+(defn commits-by-date
+  "Returns a set of all commits sorted by date"
+  [commits]
+  (let [get-date #(get-in % [:committer :date])
+        date-compare #(compare (get-date %1) (get-date %2))]
+    (apply (partial sorted-set-by date-compare) commits)))
+
+(defn flatten-commit-brs
+  "Flattens a list of branches {:keys [branch commits]} into a list of commits"
+  [branches]
+  (reduce #(into %1 (:commits %2)) [] branches))
+
+(defn get-flat-repo-commits
+  "Return a sorted set of all the commits for a repo, sorted by date"
+  [user repo]
+  (-> (get-repo-commits user repo)
+      (flatten-commit-brs)
+      (commits-by-date)))
