@@ -17,3 +17,10 @@
 
 (defn insert-user-repos! [user]
   (insert! (gh/get-user-repos (:user/username user))))
+
+(def tracked-repos #(q '[:find ?id ?name ?un
+                         :where
+                         [?id :repo/tracked true]
+                         [?id :repo/name ?name]
+                         [?id :repo/owner ?user]
+                         [?user :user/username ?un]] (db @conn)))
