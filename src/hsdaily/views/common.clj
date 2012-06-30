@@ -2,8 +2,7 @@
   (:use [noir.core :only [defpartial defpage pre-route]]
         [hiccup.page :only [include-css html5]]
         [hiccup.element :only [link-to]])
-  (:require [hsdaily.models.proj :as projs]
-            [hsdaily.models.user :as users]
+  (:require [hsdaily.models.user :as users]
             [noir.session :as session]
             [noir.response :as resp]
             [noir.request]))
