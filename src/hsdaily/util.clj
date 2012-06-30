@@ -13,7 +13,7 @@
 ;;   (if (sequential? item) item [item]))
 
 (defn- decode-unit
-  [n unit]
+  [[n unit]]
   (let [sec (partial * 1000)
         minute (partial sec 60)
         hour (partial minute 60)
@@ -25,16 +25,12 @@
       :hour (hour n)
       :day (day n))))
 
-(defn- decode-time
+(defn decode-time
   "Converts a vector of the form [1 :hour] to milliseconds.
    Accepts :milli :sec, :min, :hour, :day"
-  [[n unit & more :as time]]
+  [time]
   {:pre [(even? (count time))]}
-  (loop [[n unit & more :as time] time
-         total 0]
-    (if (seq more)
-      (recur more (+ total (decode-unit n unit)))
-      (+ total (decode-unit n unit)))))
+  (reduce #(+ %1 (decode-unit %2)) 0 (partition 2 time)))
 
 (defn every
   "Wraps at-at/every with a nicer language for time:
